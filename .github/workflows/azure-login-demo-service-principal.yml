@@ -1,0 +1,23 @@
+name: Azure Login Demo with Service Principal Secret
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  azure-login-service-principal:
+    name: Azure login with service principal secret
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login with service principal secret
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Verify Azure login
+        run: az account show
