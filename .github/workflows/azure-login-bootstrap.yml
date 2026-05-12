@@ -1,0 +1,47 @@
+name: Azure Login Bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      github-repo:
+        description: 'Repository to configure, e.g. owner/repo'
+        required: true
+      github-ref:
+        description: 'Branch or tag ref to trust for OIDC'
+        required: false
+        default: 'refs/heads/main'
+      app-name:
+        description: 'Azure AD app registration display name'
+        required: false
+        default: 'azure-login-github-actions'
+      audience:
+        description: 'OIDC audience for federated credential'
+        required: false
+        default: 'api://AzureADTokenExchange'
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    name: Bootstrap Azure login for GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Bootstrap Azure login
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_BOOTSTRAP_CREDENTIALS }}
+
+      - name: Run bootstrap script
+        env:
+          GITHUB_REPO: ${{ github.event.inputs.github-repo }}
+          GITHUB_REF: ${{ github.event.inputs.github-ref }}
+          AZURE_BOOTSTRAP_APP_NAME: ${{ github.event.inputs.app-name }}
+          AZURE_BOOTSTRAP_AUDIENCE: ${{ github.event.inputs.audience }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          chmod +x ./scripts/bootstrap-azure-login.sh
+          ./scripts/bootstrap-azure-login.sh

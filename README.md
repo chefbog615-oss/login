@@ -665,7 +665,39 @@ jobs:
     # run some actions
 
 ```
+## Bootstrap GitHub Actions Azure login
 
+This repository includes an automated bootstrap workflow to create the Azure AD app registration, service principal, role assignment, and federated identity credential required for OIDC login.
+
+### How to use
+1. Create a GitHub secret named `AZURE_BOOTSTRAP_CREDENTIALS` with a service principal JSON:
+
+```json
+{
+  "clientId": "<id>",
+  "clientSecret": "<secret>",
+  "tenantId": "<tenant>",
+  "subscriptionId": "<subscription>"
+}
+```
+
+2. (Optional) Create a GitHub secret named `GH_PAT` containing a personal access token with repo `actions` permissions. This allows the bootstrap workflow to write the generated secrets automatically.
+
+3. Run the workflow `Azure Login Bootstrap` from `.github/workflows/azure-login-bootstrap.yml`.
+
+### What the bootstrap workflow does
+- logs in to Azure using `AZURE_BOOTSTRAP_CREDENTIALS`
+- creates or reuses an Azure AD app registration
+- creates a service principal for that app
+- assigns Contributor role to the service principal on the current subscription
+- creates a GitHub OIDC federated identity credential for the selected repo and ref
+- optionally writes `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` to repo secrets if `GH_PAT` is available
+
+### After bootstrap
+Use one of the demo workflows:
+- `.github/workflows/azure-login-demo.yml`
+- `.github/workflows/azure-login-demo-powershell.yml`
+- `.github/workflows/azure-login-demo-service-principal.yml`
 ## Security hardening
 
 > [!WARNING]
